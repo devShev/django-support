@@ -9,6 +9,14 @@ services:
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+  cache:
+    image: redis
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning
+    volumes:
+      - cache:/data
   web:
     build: .
     command: python manage.py runserver 0.0.0.0:8000
@@ -20,5 +28,11 @@ services:
       - POSTGRES_NAME=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
     depends_on:
       - db
+      - cache
+volumes:
+  cache:
+    driver: local
