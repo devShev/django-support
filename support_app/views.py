@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from .models import Ticket, Message
 from .serializers import TicketSerializer, MessageSerializer
 from rest_framework import generics, permissions
-from .permissions import IsOwnerOrStaff
+from .permissions import IsOwnerOrStaff, IsTicketOwnerOrStaff
 
 
 class TicketListAPI(generics.ListCreateAPIView):
@@ -11,7 +11,7 @@ class TicketListAPI(generics.ListCreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # QuerySet в зависимости от is_staff и статуса запроса
+        # QuerySet in depending on 'is_staff' and request
         if self.request.user.is_staff:
             if self.request.GET.get('status', False):
                 return Ticket.objects.filter(status=self.request.GET['status'])
@@ -26,7 +26,7 @@ class TicketDetailAPI(generics.RetrieveUpdateDestroyAPIView):
 
     def retrieve(self, request, *args, **kwargs):
         response = super(TicketDetailAPI, self).retrieve(self, request, *args, **kwargs)
-        # Подгрузка сообщений для тикета
+        # Upload messages for ticket
         messages = Message.objects.filter(ticket_id=response.data['id']).order_by('pub_date')
         message_serializer = MessageSerializer(messages, many=True)
 
@@ -36,4 +36,4 @@ class TicketDetailAPI(generics.RetrieveUpdateDestroyAPIView):
 class MessageTicketAPI(generics.CreateAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsTicketOwnerOrStaff]

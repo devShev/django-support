@@ -1,6 +1,5 @@
 from django.contrib.auth.models import User
 from django.db import models
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 
@@ -38,12 +37,12 @@ class Ticket(models.Model):
     )
 
     created_date = models.DateTimeField(
-        default=timezone.now,
+        auto_now_add=True,
         verbose_name='Created date',
     )
 
     def __str__(self):
-        return str(self.subject) + " - " + str(self.status)
+        return f'{self.subject} - {self.status}'
 
 
 class Message(models.Model):
@@ -68,6 +67,6 @@ class Message(models.Model):
     )
 
     pub_date = models.DateTimeField(
+        auto_now_add=True,
         verbose_name='Message date',
-        default=timezone.now,
     )

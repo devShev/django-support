@@ -1,6 +1,5 @@
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError, PermissionDenied, NotFound
+from rest_framework.exceptions import ValidationError, PermissionDenied
 
 from .models import Ticket, TicketStatus, Message
 from .tasks import send_status_to_mail
@@ -15,7 +14,7 @@ class TicketSerializer(serializers.Serializer):
     created_date = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        # Текущий пользователь как автор
+        # Current user as author
         validated_data.update({'author_id': self.context['request'].user.pk})
 
         return Ticket.objects.create(**validated_data)
@@ -36,7 +35,7 @@ class TicketSerializer(serializers.Serializer):
         instance.save()
 
         if start_status != instance.status:
-            send_status_to_mail(instance)
+            send_status_to_mail.delay(instance.status, instance.author.email)
 
         return instance
 
@@ -49,21 +48,13 @@ class MessageSerializer(serializers.Serializer):
     pub_date = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
-        # Вьюшка для получения значения 'pk'
+        # View for get 'pk'
         view = self.context.get('view')
         ticket_id = view.kwargs['pk']
 
-        try:
-            ticket = Ticket.objects.get(pk=ticket_id)
-        except ObjectDoesNotExist:
-            raise NotFound
-
-        if not (self.context['request'].user.is_staff or ticket.author == self.context['request'].user):
-            raise PermissionDenied
-
-        # Текущий пользователь как автор сообщения
+        # Current user as author of message
         validated_data.update({'author_id': self.context['request'].user.pk})
-        # pk из вьюшки как ticket_id
+        # 'pk' from view as 'ticket_id'
         validated_data.update({'ticket_id': ticket_id})
 
         return Message.objects.create(**validated_data)
