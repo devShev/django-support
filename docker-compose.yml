@@ -19,7 +19,7 @@ services:
       - cache:/data
   web:
     build: .
-    command: python manage.py runserver 0.0.0.0:8000
+    entrypoint: /code/entrypoint.sh
     volumes:
       - .:/code
     ports:
