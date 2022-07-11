@@ -1,5 +1,6 @@
-from support.celery import app
 from django.core.mail import send_mail
+
+from support.celery import app
 
 
 @app.task

@@ -9,7 +9,7 @@ from rest_framework.test import APIClient
 def client():
     client = APIClient()
     # Create user
-    user = User.objects.create_user(username='user', password='simplepassword', email='user@example.com', is_staff=True)
+    User.objects.create_user(username='user', password='simplepassword', email='user@example.com', is_staff=True)
     # Login by user
     get_token_url = reverse('token_obtain_pair')
     payload = {

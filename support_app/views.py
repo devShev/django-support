@@ -1,8 +1,9 @@
-from rest_framework.response import Response
-from .models import Ticket, Message
-from .serializers import TicketSerializer, MessageSerializer
 from rest_framework import generics, permissions
+from rest_framework.response import Response
+
+from .models import Message, Ticket
 from .permissions import IsOwnerOrStaff, IsTicketOwnerOrStaff
+from .serializers import MessageSerializer, TicketSerializer
 
 
 class TicketListAPI(generics.ListCreateAPIView):

@@ -1,7 +1,7 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from .models import Ticket, TicketStatus, Message
+from .models import Message, Ticket, TicketStatus
 from .tasks import send_status_to_mail
 
 

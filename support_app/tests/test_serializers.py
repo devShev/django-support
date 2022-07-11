@@ -1,8 +1,8 @@
 import pytest
 from django.contrib.auth.models import User
 
-from support_app.models import Ticket, Message
-from support_app.serializers import TicketSerializer, MessageSerializer
+from support_app.models import Message, Ticket
+from support_app.serializers import MessageSerializer, TicketSerializer
 
 
 @pytest.mark.django_db
