@@ -6,7 +6,7 @@ from .fixtures import client, ticket, user
 
 
 @pytest.mark.django_db
-def test_post_tickets(client, user):
+def test_post_ticket(client, user):
     # Test POST method
     payload = {
         'subject': 'Test subject',
@@ -27,7 +27,7 @@ def test_post_tickets(client, user):
 
 
 @pytest.mark.django_db
-def test_get_tickets(client, ticket):
+def test_get_ticket(client, ticket):
     response = client.get('/api/v1/tickets/')
     assert response.status_code == status.HTTP_200_OK
 
@@ -36,7 +36,7 @@ def test_get_tickets(client, ticket):
 
 
 @pytest.mark.django_db
-def test_put_tickets(client, ticket, user):
+def test_put_ticket(client, ticket, user):
     payload = {
         'subject': 'Test subject 2',
         'description': 'Test description 2',
@@ -57,7 +57,7 @@ def test_put_tickets(client, ticket, user):
 
 
 @pytest.mark.django_db
-def test_bad_put_tickets(client, ticket):
+def test_bad_put_ticket(client, ticket):
     payload = {
         'subject': 'Test subject',
         'description': 'Test description',
