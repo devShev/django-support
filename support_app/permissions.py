@@ -7,6 +7,8 @@ from support_app.models import Ticket
 class IsOwnerOrStaff(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
+        if request.method == 'PUT':
+            return bool(request.user.is_staff)
         return bool(obj.author == request.user) or bool(request.user and request.user.is_staff)
 
 

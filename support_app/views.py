@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from .models import Message, Ticket
 from .permissions import IsOwnerOrStaff, IsTicketOwnerOrStaff
 from .serializers import MessageSerializer, TicketSerializer
+from .tasks import send_status_to_mail
 
 
 class TicketListAPI(generics.ListCreateAPIView):
@@ -32,6 +33,35 @@ class TicketDetailAPI(generics.RetrieveUpdateDestroyAPIView):
         message_serializer = MessageSerializer(messages, many=True)
 
         return Response({'ticket': response.data, 'messages': message_serializer.data})
+
+    def put(self, request, *args, **kwargs):
+        start_status = self.get_object().status
+
+        self.update(request, *args, **kwargs)
+
+        current_ticket = self.get_object()
+        if current_ticket.status != start_status:
+            send_status_to_mail.delay(current_ticket.status, current_ticket.author.email)
+
+        ticket_serializer = TicketSerializer(current_ticket)
+
+        return Response(ticket_serializer.data)
+
+    def patch(self, request, *args, **kwargs):
+        # Read start status in depending on request
+        start_status = self.get_object().status if request.data.get('status', False) else None
+
+        self.partial_update(request, *args, **kwargs)
+
+        current_ticket = self.get_object()
+
+        if start_status is not None:
+            if current_ticket.status != start_status:
+                send_status_to_mail.delay(current_ticket.status, current_ticket.author.email)
+
+        ticket_serializer = TicketSerializer(current_ticket)
+
+        return Response(ticket_serializer.data)
 
 
 class MessageTicketAPI(generics.CreateAPIView):

@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import ValidationError
 
 from .models import Message, Ticket, TicketStatus
-from .tasks import send_status_to_mail
 
 
 class TicketSerializer(serializers.Serializer):
@@ -20,11 +19,6 @@ class TicketSerializer(serializers.Serializer):
         return Ticket.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
-        if not self.context['request'].user.is_staff:
-            raise PermissionDenied
-
-        start_status = instance.status
-
         instance.subject = validated_data.get('subject', instance.subject)
         instance.description = validated_data.get('description', instance.description)
         instance.status = validated_data.get('status', instance.status)
@@ -33,9 +27,6 @@ class TicketSerializer(serializers.Serializer):
             raise ValidationError('Invalid status.')
 
         instance.save()
-
-        if start_status != instance.status:
-            send_status_to_mail.delay(instance.status, instance.author.email)
 
         return instance
 
